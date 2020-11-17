@@ -1,6 +1,7 @@
 import pathlib, pygame, random, threading
 
 path = pathlib.Path(__file__).resolve().parent
+font = str(path) + "/lib/font.ttf"
 
 WIDTH = 570
 DISPLAY_HEIGHT = 400
@@ -17,7 +18,7 @@ green = pygame.Color(0, 255, 0)
 
 clock = pygame.time.Clock()
 display = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.display.set_caption("*** BIRDS ***")
+pygame.display.set_caption("Birds")
 
 bird_width = 66
 bird_height = 46
@@ -79,13 +80,20 @@ class Bird:
             if isinstance(argv[0], int) and isinstance(argv[1], int):
                 if argv[0] > self.x and argv[0] < self.x+bird_width and argv[1] > self.y and argv[1] < self.y+bird_height:
                     global SCORE
-                    SCORE += 1
+                    SCORE += self.x/10
                     self.new()
 
 
 def draw_scoreboard():
     pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
     display.blit(scoreboard, (0, DISPLAY_HEIGHT))
+    
+    score_font = pygame.font.Font(font, 20)
+    score_text = score_font.render(f"Score: {SCORE:.1f}", pygame.Color(0, 0, 0), True)
+    score_text_height = score_text.get_rect().height
+    
+    display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
+    
 
 def draw_background():
     display.blit(cloud_img, (0, 0))
