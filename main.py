@@ -1,7 +1,18 @@
-import pathlib, pygame, random, threading
+import pygame, pathlib, random, pickle
 
 path = pathlib.Path(__file__).resolve().parent
 font = str(path) + "/lib/font.ttf"
+
+try:
+    config = pickle.load(open(str(path) + "/lib/config.dat", "rb"))
+except:
+    config = {
+        "draw_scoreboard": True,
+        "draw_background": True,
+        "show_crosshair": False,
+        "bird_show_hitbox": False,
+        "best_score": 0,
+    }
 
 WIDTH = 570
 DISPLAY_HEIGHT = 400
@@ -62,7 +73,8 @@ class Bird:
         self.image += 1
     
     def show_hitbox(self):
-        pygame.draw.rect(display, yellow, (self.x, self.y, bird_width, bird_height), width=1)
+        if config["bird_show_hitbox"]:
+            pygame.draw.rect(display, yellow, (self.x, self.y, bird_width, bird_height), width=1)
     
     def move(self):
         self.x -= self.speed
@@ -85,31 +97,38 @@ class Bird:
 
 
 def draw_scoreboard():
-    pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
-    display.blit(scoreboard, (0, DISPLAY_HEIGHT))
-    
-    score_font = pygame.font.Font(font, 20)
-    score_text = score_font.render(f"Score: {SCORE:.1f}", pygame.Color(0, 0, 0), True)
-    score_text_height = score_text.get_rect().height
-    
-    display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
+    if config["draw_scoreboard"]:
+        pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
+        display.blit(scoreboard, (0, DISPLAY_HEIGHT))
+        
+        score_font = pygame.font.Font(font, 20)
+        score_text = score_font.render(f"Score: {SCORE:.1f}", pygame.Color(0, 0, 0), True)
+        score_text_height = score_text.get_rect().height
+        
+        best_score_text = score_font.render(f"Best Score: {config['best_score']:.1f}", pygame.Color(0, 0, 0), True)
+        best_score_text_height = best_score_text.get_rect().height
+        
+        display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
+        display.blit(best_score_text, (20, DISPLAY_HEIGHT+best_score_text_height*1.5))
     
 
 def draw_background():
-    display.blit(cloud_img, (0, 0))
-    display.blit(grass, (0, DISPLAY_HEIGHT-grass.get_height()))
+    if config["draw_background"]:
+        display.blit(cloud_img, (0, 0))
+        display.blit(grass, (0, DISPLAY_HEIGHT-grass.get_height()))
 
 def show_crosshair():
-    global crosshair
-    pygame.mouse.set_visible(False)
-    
-    x = pygame.mouse.get_pos()[0] - crosshair_size/2
-    y = pygame.mouse.get_pos()[1] - crosshair_size/2
-    
-    crosshair = pygame.transform.scale(crosshair, (crosshair_size, crosshair_size))
-    crosshair_rect = crosshair.get_rect()
-    crosshair_rect = crosshair_rect.move((x, y))
-    display.blit(crosshair, crosshair_rect)
+    if config["show_crosshair"]:
+        global crosshair
+        pygame.mouse.set_visible(False)
+        
+        x = pygame.mouse.get_pos()[0] - crosshair_size/2
+        y = pygame.mouse.get_pos()[1] - crosshair_size/2
+        
+        crosshair = pygame.transform.scale(crosshair, (crosshair_size, crosshair_size))
+        crosshair_rect = crosshair.get_rect()
+        crosshair_rect = crosshair_rect.move((x, y))
+        display.blit(crosshair, crosshair_rect)
 
 
 
@@ -125,10 +144,15 @@ while True:
         bird.move()
         bird.show()
         bird.update()
-        # bird.show_hitbox()
+        bird.show_hitbox()
         
     draw_scoreboard()
-    # show_crosshair()
+    show_crosshair()
+    
+    # Save current progress
+    if SCORE > config["best_score"]:
+        config["best_score"] = SCORE
+    pickle.dump(config, open(str(path) + "/lib/config.dat", "wb"))
     
     # ===
     for event in pygame.event.get():
