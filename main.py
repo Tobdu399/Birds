@@ -21,6 +21,7 @@ pygame.display.set_caption("*** BIRDS ***")
 
 bird_width = 66
 bird_height = 46
+crosshair_size = 25
 
 # ===
 bird_img1 = pygame.image.load(str(path) + "/lib/bird1.png")
@@ -34,6 +35,8 @@ bird_img3 = pygame.transform.scale(bird_img3, (bird_width, bird_height))
 bird_img4 = pygame.transform.scale(bird_img4, (bird_width, bird_height))
 
 cloud_img = pygame.image.load(str(path) + "/lib/clouds.png")
+crosshair = pygame.image.load(str(path) + "/lib/crosshair.png")
+scoreboard = pygame.image.load(str(path) + "/lib/scoreboard.png")
 
 # ===
 birds = []
@@ -81,6 +84,19 @@ class Bird:
 
 def draw_scoreboard():
     pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
+    # display.blit(scoreboard, (0, DISPLAY_HEIGHT))
+
+def show_crosshair():
+    global crosshair
+    pygame.mouse.set_visible(False)
+    
+    x = pygame.mouse.get_pos()[0] - crosshair_size/2
+    y = pygame.mouse.get_pos()[1] - crosshair_size/2
+    
+    crosshair = pygame.transform.scale(crosshair, (crosshair_size, crosshair_size))
+    crosshair_rect = crosshair.get_rect()
+    crosshair_rect = crosshair_rect.move((x, y))
+    display.blit(crosshair, crosshair_rect)
 
 
 
@@ -99,6 +115,7 @@ while True:
         # bird.show_hitbox()
         
     draw_scoreboard()
+    # show_crosshair()
     
     # ===
     for event in pygame.event.get():
