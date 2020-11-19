@@ -1,18 +1,21 @@
 import pygame, pathlib, random, pickle
 
 path = pathlib.Path(__file__).resolve().parent
-font = str(path) + "/lib/font.ttf"
+font = str(path) + "/lib/Font/font.ttf"
 
 try:
     config = pickle.load(open(str(path) + "/lib/config.dat", "rb"))
 except:
-    config = {
-        "draw_scoreboard": True,
-        "draw_background": True,
-        "show_crosshair": False,
-        "bird_show_hitbox": False,
-        "best_score": 0,
-    }
+    config = [
+        {   # Settings
+            "draw_background": True,
+            "show_crosshair": False,
+            "bird_show_hitbox": False,
+            "bird_show": True,
+        },
+        
+        [0]  # Best Score
+    ]
 
 WIDTH = 570
 DISPLAY_HEIGHT = 400
@@ -25,7 +28,7 @@ pygame.init()
 white = pygame.Color(255, 255, 255)
 blue = pygame.Color(0, 200, 255)
 yellow = pygame.Color(255, 255, 0)
-green = pygame.Color(0, 255, 0)
+black = pygame.Color(0, 0, 0)
 
 clock = pygame.time.Clock()
 display = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -36,20 +39,20 @@ bird_height = 46
 crosshair_size = 25
 
 # ===
-bird_img1 = pygame.image.load(str(path) + "/lib/bird1.png")
-bird_img2 = pygame.image.load(str(path) + "/lib/bird2.png")
-bird_img3 = pygame.image.load(str(path) + "/lib/bird3.png")
-bird_img4 = pygame.image.load(str(path) + "/lib/bird4.png")
+bird_img1 = pygame.image.load(str(path) + "/lib/Bird/bird1.png")
+bird_img2 = pygame.image.load(str(path) + "/lib/Bird/bird2.png")
+bird_img3 = pygame.image.load(str(path) + "/lib/Bird/bird3.png")
+bird_img4 = pygame.image.load(str(path) + "/lib/Bird/bird4.png")
 
 bird_img1 = pygame.transform.scale(bird_img1, (bird_width, bird_height))
 bird_img2 = pygame.transform.scale(bird_img2, (bird_width, bird_height))
 bird_img3 = pygame.transform.scale(bird_img3, (bird_width, bird_height))
 bird_img4 = pygame.transform.scale(bird_img4, (bird_width, bird_height))
 
-cloud_img = pygame.image.load(str(path) + "/lib/clouds.png")
-grass = pygame.image.load(str(path) + "/lib/grass.png")
-crosshair = pygame.image.load(str(path) + "/lib/crosshair.png")
-scoreboard = pygame.image.load(str(path) + "/lib/scoreboard.png")
+cloud_img = pygame.image.load(str(path) + "/lib/Background/clouds.png")
+grass = pygame.image.load(str(path) + "/lib/Background/grass.png")
+crosshair = pygame.image.load(str(path) + "/lib/Miscellaneous/crosshair.png")
+scoreboard = pygame.image.load(str(path) + "/lib/Miscellaneous/scoreboard.png")
 
 # ===
 birds = []
@@ -68,12 +71,14 @@ class Bird:
         
         bird_rect = bird_img.get_rect()
         bird_rect = bird_rect.move((self.x, self.y))
-        display.blit(bird_img, bird_rect)
+        
+        if config[0]["bird_show"]:
+            display.blit(bird_img, bird_rect)
         
         self.image += 1
     
     def show_hitbox(self):
-        if config["bird_show_hitbox"]:
+        if config[0]["bird_show_hitbox"]:
             pygame.draw.rect(display, yellow, (self.x, self.y, bird_width, bird_height), width=1)
     
     def move(self):
@@ -97,28 +102,36 @@ class Bird:
 
 
 def draw_scoreboard():
-    if config["draw_scoreboard"]:
-        pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
-        display.blit(scoreboard, (0, DISPLAY_HEIGHT))
-        
-        score_font = pygame.font.Font(font, 20)
-        score_text = score_font.render(f"Score: {SCORE:.1f}", pygame.Color(0, 0, 0), True)
-        score_text_height = score_text.get_rect().height
-        
-        best_score_text = score_font.render(f"Best Score: {config['best_score']:.1f}", pygame.Color(0, 0, 0), True)
-        best_score_text_height = best_score_text.get_rect().height
-        
-        display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
-        display.blit(best_score_text, (20, DISPLAY_HEIGHT+best_score_text_height*1.5))
+    pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
+    display.blit(scoreboard, (0, DISPLAY_HEIGHT))
     
+    score_font = pygame.font.Font(font, 20)
+    score_text = score_font.render(f"Score: {SCORE:.1f}", black, True)
+    score_text_height = score_text.get_rect().height
+    
+    best_score_text = score_font.render(f"Best Score: {config[1][0]:.1f}", black, True)
+    best_score_text_height = best_score_text.get_rect().height
+    
+    display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
+    display.blit(best_score_text, (20, DISPLAY_HEIGHT+best_score_text_height*1.5))
+        
+def show_settings():
+    settings_font = pygame.font.Font(font, 15)
+    keys = list(config[0])
 
+    for setting in range(len(config[0])):
+        settings_text = settings_font.render(f"{keys[setting]}: {config[0][keys[setting]]}", black, True)
+        settings_text_height = settings_text.get_rect().height
+        
+        display.blit(settings_text, (WIDTH/2, DISPLAY_HEIGHT+settings_text_height/2 + (20*setting)))
+    
 def draw_background():
-    if config["draw_background"]:
+    if config[0]["draw_background"]:
         display.blit(cloud_img, (0, 0))
         display.blit(grass, (0, DISPLAY_HEIGHT-grass.get_height()))
 
 def show_crosshair():
-    if config["show_crosshair"]:
+    if config[0]["show_crosshair"]:
         global crosshair
         pygame.mouse.set_visible(False)
         
@@ -129,6 +142,8 @@ def show_crosshair():
         crosshair_rect = crosshair.get_rect()
         crosshair_rect = crosshair_rect.move((x, y))
         display.blit(crosshair, crosshair_rect)
+    else:
+        pygame.mouse.set_visible(True)
 
 
 
@@ -147,11 +162,12 @@ while True:
         bird.show_hitbox()
         
     draw_scoreboard()
+    show_settings()
     show_crosshair()
     
     # Save current progress
-    if SCORE > config["best_score"]:
-        config["best_score"] = SCORE
+    if SCORE > config[1][0]:
+        config[1][0] = SCORE
     pickle.dump(config, open(str(path) + "/lib/config.dat", "wb"))
     
     # ===
@@ -159,6 +175,32 @@ while True:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
+        
+        keys = list(config[0])
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_1:
+                if config[0][keys[0]]:
+                    config[0][keys[0]] = False
+                else:
+                    config[0][keys[0]] = True
+                
+            if event.key == pygame.K_2:
+                if config[0][keys[1]]:
+                    config[0][keys[1]] = False
+                else:
+                    config[0][keys[1]] = True
+            
+            if event.key == pygame.K_3:
+                if config[0][keys[2]]:
+                    config[0][keys[2]] = False
+                else:
+                    config[0][keys[2]] = True
+            
+            if event.key == pygame.K_4:
+                if config[0][keys[3]]:
+                    config[0][keys[3]] = False
+                else:
+                    config[0][keys[3]] = True
         
         if event.type == pygame.MOUSEBUTTONUP:
             for bird in birds:
