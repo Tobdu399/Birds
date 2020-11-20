@@ -1,16 +1,16 @@
 # Birds
 
 **GUIDE**:
-_Click the birds as soon as you can! The quicklier you click them, the more points you get_
+_Click the birds as soon as you can! The quicklier you click them, the more points you get._
 
 **CUSTOMIZATION**:
-- draw_background (press 1 to hide/show)
-- show_crosshair (press 2 to hide/show)
-- bird_show_hitbox (press 3 to show/hide)
-- bird_show (press 4 to show/hide)
+- draw_background   (press 1 to hide/show)
+- show_crosshair    (press 2 to show/hide)
+- bird_show_hitbox  (press 3 to show/hide)
+- bird_show         (press 4 to hide/show)
 
 **REQUIREMENTS**:
-- Python 3.9.0
-- Pygame 2.0.0
+- Python 3.9        (recommended)
+- Pygame 2.0        (or newer)
 
 ![Birds](lib/Miscellaneous/birds.png?raw=true)
