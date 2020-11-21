@@ -1,4 +1,4 @@
-import pygame, pathlib, random, pickle
+import pygame, pathlib, random, pickle, threading
 
 path = pathlib.Path(__file__).resolve().parent
 font = str(path) + "/lib/Font/font.ttf"
@@ -22,6 +22,7 @@ DISPLAY_HEIGHT = 400
 HEIGHT = 500
 
 SCORE = 0
+GAMEOVER = False
 
 pygame.init()
 
@@ -144,68 +145,86 @@ def show_crosshair():
         display.blit(crosshair, crosshair_rect)
     else:
         pygame.mouse.set_visible(True)
+        
 
+def spawn_birds():
+    while not GAMEOVER:
+        for _ in range(50):     # Spawning rate: 5 seconds
+            pygame.time.wait(100)
+            if GAMEOVER:
+                return
+
+        bird = Bird()
+        birds.append(bird)
 
 
 for _ in range(5):
     bird = Bird()
     birds.append(bird)
 
-while True:
-    display.fill(blue)
-    draw_background()
-        
-    for bird in birds:
-        bird.move()
-        bird.show()
-        bird.update()
-        bird.show_hitbox()
-        
-    draw_scoreboard()
-    show_settings()
-    show_crosshair()
+def main():
+    threading.Thread(target = spawn_birds).start()
     
-    # Save current progress
-    if SCORE > config[1][0]:
-        config[1][0] = SCORE
-    pickle.dump(config, open(str(path) + "/lib/config.dat", "wb"))
-    
-    # ===
-    for event in pygame.event.get():
-        if event.type == pygame.QUIT:
-            pygame.quit()
-            exit()
+    global GAMEOVER
+    while not GAMEOVER:
+        display.fill(blue)
+        draw_background()
+            
+        for bird in birds:
+            bird.move()
+            bird.show()
+            bird.update()
+            bird.show_hitbox()
+            
+        draw_scoreboard()
+        show_settings()
+        show_crosshair()
         
-        keys = list(config[0])
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_1:
-                if config[0][keys[0]]:
-                    config[0][keys[0]] = False
-                else:
-                    config[0][keys[0]] = True
+        # Save current progress
+        if SCORE > config[1][0]:
+            config[1][0] = SCORE
+        pickle.dump(config, open(str(path) + "/lib/config.dat", "wb"))
+        
+        # ===
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                GAMEOVER = True
+                pygame.quit()
+                exit()
+            
+            keys = list(config[0])
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_1:
+                    if config[0][keys[0]]:
+                        config[0][keys[0]] = False
+                    else:
+                        config[0][keys[0]] = True
+                    
+                if event.key == pygame.K_2:
+                    if config[0][keys[1]]:
+                        config[0][keys[1]] = False
+                    else:
+                        config[0][keys[1]] = True
                 
-            if event.key == pygame.K_2:
-                if config[0][keys[1]]:
-                    config[0][keys[1]] = False
-                else:
-                    config[0][keys[1]] = True
+                if event.key == pygame.K_3:
+                    if config[0][keys[2]]:
+                        config[0][keys[2]] = False
+                    else:
+                        config[0][keys[2]] = True
+                
+                if event.key == pygame.K_4:
+                    if config[0][keys[3]]:
+                        config[0][keys[3]] = False
+                    else:
+                        config[0][keys[3]] = True
             
-            if event.key == pygame.K_3:
-                if config[0][keys[2]]:
-                    config[0][keys[2]] = False
-                else:
-                    config[0][keys[2]] = True
-            
-            if event.key == pygame.K_4:
-                if config[0][keys[3]]:
-                    config[0][keys[3]] = False
-                else:
-                    config[0][keys[3]] = True
+            if event.type == pygame.MOUSEBUTTONUP:
+                for bird in birds:
+                    bird.update(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
         
-        if event.type == pygame.MOUSEBUTTONUP:
-            for bird in birds:
-                bird.update(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
-    
-    # ===
-    pygame.display.update()
-    clock.tick(60)
+        # ===
+        pygame.display.update()
+        clock.tick(60)
+        
+
+main()
