@@ -113,8 +113,12 @@ def draw_scoreboard():
     best_score_text = score_font.render(f"Best Score: {config[1][0]:.1f}", black, True)
     best_score_text_height = best_score_text.get_rect().height
     
-    display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height/2))
+    difficulty_text = score_font.render("Difficulty: ", black, True)
+    difficulty_text_height = difficulty_text.get_rect().height
+    
+    display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height*0.5))
     display.blit(best_score_text, (20, DISPLAY_HEIGHT+best_score_text_height*1.5))
+    display.blit(difficulty_text, (20, DISPLAY_HEIGHT+difficulty_text_height*2.5))
         
 def show_settings():
     settings_font = pygame.font.Font(font, 15)
@@ -162,7 +166,7 @@ for _ in range(5):
     bird = Bird()
     birds.append(bird)
 
-def main():
+def game():
     threading.Thread(target = spawn_birds).start()
     
     global GAMEOVER
@@ -195,28 +199,16 @@ def main():
             keys = list(config[0])
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_1:
-                    if config[0][keys[0]]:
-                        config[0][keys[0]] = False
-                    else:
-                        config[0][keys[0]] = True
+                    config[0][keys[0]] = not config[0][keys[0]]
                     
                 if event.key == pygame.K_2:
-                    if config[0][keys[1]]:
-                        config[0][keys[1]] = False
-                    else:
-                        config[0][keys[1]] = True
+                    config[0][keys[1]] = not config[0][keys[1]]
                 
                 if event.key == pygame.K_3:
-                    if config[0][keys[2]]:
-                        config[0][keys[2]] = False
-                    else:
-                        config[0][keys[2]] = True
+                    config[0][keys[2]] = not config[0][keys[2]]
                 
                 if event.key == pygame.K_4:
-                    if config[0][keys[3]]:
-                        config[0][keys[3]] = False
-                    else:
-                        config[0][keys[3]] = True
+                    config[0][keys[3]] = not config[0][keys[3]]
             
             if event.type == pygame.MOUSEBUTTONUP:
                 for bird in birds:
@@ -227,4 +219,4 @@ def main():
         clock.tick(60)
         
 
-main()
+game()
