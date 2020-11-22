@@ -12,5 +12,6 @@ _Click the birds as soon as you can! The quicklier you click them, the more poin
 **REQUIREMENTS**:
 - Python 3.9        (recommended)
 - Pygame 2.0        (or newer)
+- sourcedefender
 
 ![Birds](lib/Miscellaneous/birds.png?raw=true)
