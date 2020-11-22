@@ -1,2 +1,3 @@
-lib/config.dat
-__pycache__/
+lib/Files/main.py
+lib/Files/config.dat
+*__pycache__/
