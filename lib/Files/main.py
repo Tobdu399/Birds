@@ -8,8 +8,7 @@ font = str(path) + "/Font/font.ttf"
 # And if this ^ happens, the file is propably missing or corrupted
 try:
     config = pickle.load(open(str(path) + "/Files/config.dat", "rb"))
-except(Exception):
-    print(Exception)
+except:
     config = [
         {   # Settings
             "draw_background": True,
@@ -27,6 +26,14 @@ HEIGHT = 500
 
 SCORE = 0
 GAMEOVER = False
+DIFFICULTY = None
+
+difficulties = {
+    "Easy" : 50,
+    "Medium" : 25,
+    "Hard" : 10,
+}
+cursor = 0
 
 pygame.init()
 
@@ -34,6 +41,7 @@ white = pygame.Color(255, 255, 255)
 blue = pygame.Color(0, 200, 255)
 yellow = pygame.Color(255, 255, 0)
 black = pygame.Color(0, 0, 0)
+green = pygame.Color(100, 255, 100)
 
 clock = pygame.time.Clock()
 display = pygame.display.set_mode((WIDTH, HEIGHT))
@@ -107,6 +115,7 @@ class Bird:
 
 
 def draw_scoreboard():
+    global cursor
     pygame.draw.rect(display, white, (0, DISPLAY_HEIGHT, WIDTH, HEIGHT))
     display.blit(scoreboard, (0, DISPLAY_HEIGHT))
     
@@ -117,7 +126,7 @@ def draw_scoreboard():
     best_score_text = score_font.render(f"Best Score: {config[1][0]:.1f}", black, True)
     best_score_text_height = best_score_text.get_rect().height
     
-    difficulty_text = score_font.render("Difficulty: ", black, True)
+    difficulty_text = score_font.render(f"Difficulty: {list(difficulties.keys())[cursor % len(list(difficulties.keys()))]}", black, True)
     difficulty_text_height = difficulty_text.get_rect().height
     
     display.blit(score_text, (20, DISPLAY_HEIGHT+score_text_height*0.5))
@@ -157,7 +166,7 @@ def show_crosshair():
 
 def spawn_birds():
     while not GAMEOVER:
-        for _ in range(50):     # Spawning rate: 5 seconds
+        for _ in range(difficulties[DIFFICULTY]):     # Spawning rate: 5 seconds
             pygame.time.wait(100)
             if GAMEOVER:
                 return
@@ -169,32 +178,56 @@ def spawn_birds():
 for _ in range(5):
     bird = Bird()
     birds.append(bird)
-
-def game():
-    threading.Thread(target = spawn_birds).start()
     
+    
+def menu():
+    header_font = pygame.font.Font(font, 60)
+    header = header_font.render("Select Difficulty", True, black)
+    header_rect = header.get_rect()
+    header_rect.midtop = (int(WIDTH/2), int(DISPLAY_HEIGHT/5))
+
+    dif_font = pygame.font.Font(font, 25)
+    for dif in difficulties:
+        if cursor % len(difficulties) == list(difficulties.keys()).index(dif):
+            dif_option = dif_font.render(dif, True, white)
+        else: dif_option = dif_font.render(dif, True, black)
+
+        dif_option_rect = dif_option.get_rect()
+        dif_option_rect.center = (int(WIDTH/2), int(DISPLAY_HEIGHT/2) + list(difficulties.keys()).index(dif)*40)
+        display.blit(dif_option, dif_option_rect)
+
+    display.blit(header, header_rect)
+
+def game():    
     global GAMEOVER
+    global DIFFICULTY
     while not GAMEOVER:
         display.fill(blue)
-        draw_background()
-            
-        for bird in birds:
-            bird.move()
-            bird.show()
-            bird.update()
-            bird.show_hitbox()
-            
+        
         draw_scoreboard()
-        show_settings()
-        show_crosshair()
-        
-        # Save current progress
-        if SCORE > config[1][0]:
-            config[1][0] = SCORE
-        pickle.dump(config, open(str(path) + "/Files/config.dat", "wb"))
-        
+        draw_background()
+
+        if DIFFICULTY == None:
+            menu()
+        else:
+            # if threading.Thread(target = spawn_birds).start().is_alive():
+            #     print("moi")            
+            for bird in birds:
+                bird.move()
+                bird.show()
+                bird.update()
+                bird.show_hitbox()
+
+            show_settings()
+            show_crosshair()
+            
+            # Save current progress
+            if SCORE > config[1][0]:
+                config[1][0] = SCORE
+            pickle.dump(config, open(str(path) + "/Files/config.dat", "wb"))
+            
         # ===
-        for event in pygame.event.get():
+        for event in pygame.event.get():            
             if event.type == pygame.QUIT:
                 GAMEOVER = True
                 pygame.quit()
@@ -213,6 +246,17 @@ def game():
                 
                 if event.key == pygame.K_4:
                     config[0][keys[3]] = not config[0][keys[3]]
+                
+                if DIFFICULTY == None:
+                    global cursor
+                    if event.key == pygame.K_UP:
+                        cursor -= 1
+                    if event.key == pygame.K_DOWN:
+                        cursor += 1
+                    if event.key == pygame.K_RETURN:
+                        for dif in difficulties:
+                            if cursor%len(difficulties) == list(difficulties.keys()).index(dif):
+                                DIFFICULTY = difficulties[dif]
             
             if event.type == pygame.MOUSEBUTTONUP:
                 for bird in birds:
