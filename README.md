@@ -1,8 +1,8 @@
 # Birds
 
 **GUIDE**:
-_Click the birds as soon as you can! The quicklier you click them, the more points you get._
-_Start the game by running the 'game.pyw' file!_
+- _Click the birds as soon as you can! The quicklier you click them, the more points you get._
+- _Start the game by running the 'game.pyw' file!_
 
 **CUSTOMIZATION**:
 - draw_background   (press 1 to hide/show)
